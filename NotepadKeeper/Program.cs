@@ -156,9 +156,13 @@ namespace NotepadKeeper
 
         static void Main(string[] args)
         {
-            // 指定要遍历的文件夹路径
-            string directoryPath = @"C:\Users\root\AppData\Local\Packages\Microsoft.WindowsNotepad_8wekyb3d8bbwe\LocalState\TabState";
 
+            // 获取当前用户的AppData\Local文件夹路径
+            string appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            // 指定要遍历的文件夹路径
+            string directoryPath = $@"{appDataLocalPath}\Packages\Microsoft.WindowsNotepad_8wekyb3d8bbwe\LocalState\TabState";
+            
             // 获取目录中所有的.bin文件
             string[] filePaths = Directory.GetFiles(directoryPath, "*.bin");
 
