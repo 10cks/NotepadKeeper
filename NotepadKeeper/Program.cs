@@ -15,6 +15,7 @@ namespace NotepadKeeper
             return (a - c) + (b * c);
         }
 
+        // 保存文件读取
         public static void savedFile(FileStream fileStreamInput)
         {
             // 指定要读取的文件路径
@@ -43,20 +44,25 @@ namespace NotepadKeeper
                     fileStream.Seek(5 + length, SeekOrigin.Begin);
                     int a = fileStream.ReadByte();
                     int b = fileStream.ReadByte();
+                    int z = fileStream.ReadByte();
                     int contentLength;
 
 #if DEBUG
                     Console.WriteLine($"a: {a}, b: {b}");
 #endif 
-                    if (b == 5)
+                    if (b == 5 && z == 1)
                     {
+#if DEBUG
                         Console.WriteLine("Content Length < 0x80");
+#endif
                         contentLength = a;
                         Console.WriteLine("Content Length: " + contentLength);
                     }
                     else
                     {
+#if DEBUG
                         Console.WriteLine("Content Length > 0x80");
+#endif
                         int c = 0x80;
                         int result = CalculateExpression(a, b, c);
                         contentLength = result;
@@ -92,12 +98,17 @@ namespace NotepadKeeper
             }
         }
 
+
+        // 未保存文件读取
         public static void unsavedFile(FileStream fileStreamInput)
         {
             try
             {
                 using (FileStream fileStream = fileStreamInput)
                 {
+
+                    // 未保存文件无文件名
+
                     // 确保文件长度足以进行读取
                     if (fileStream.Length < 20)  // 至少需要13 + 7 = 20个字节
                     {
