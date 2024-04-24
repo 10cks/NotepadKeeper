@@ -2,11 +2,47 @@
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace NotepadKeeper
 {
     class Program
     {
+
+        public static void CheckAndKillProcess(string processName)
+        {
+            // 使用 GetProcessesByName 获取与指定名称相符的所有进程
+            Process[] runningProcesses = Process.GetProcessesByName(processName);
+
+            if (runningProcesses.Length > 0)
+            {
+                Console.WriteLine($"Process {processName} is running!");
+
+                // 遍历找到的所有进程并尝试关闭它们
+                foreach (Process proc in runningProcesses)
+                {
+                    try
+                    {
+                        // 关闭前先确保进程没有被关闭
+                        if (!proc.HasExited)
+                        {
+                            proc.Kill(); // 强制关闭进程
+                            proc.WaitForExit(); // 等待进程关闭
+                            Console.WriteLine($"Process {proc.ProcessName} (ID: {proc.Id}) is closed.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // 处理可能出现的异常，例如没有足够权限关闭进程
+                        Console.WriteLine($"Can't close {proc.ProcessName} (ID: {proc.Id}): {ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Can't find {processName}.");
+            }
+        }
 
         /* 
         已保存文件结构：
@@ -256,6 +292,9 @@ namespace NotepadKeeper
 
         static void Main(string[] args)
         {
+            // 检查进程是否运行
+            CheckAndKillProcess("notepad");
+
             // 获取当前用户的AppData\Local文件夹路径
             string appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
