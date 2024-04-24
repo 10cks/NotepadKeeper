@@ -3,11 +3,40 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Linq;
 
 namespace NotepadKeeper
 {
     class Program
     {
+
+        public static string FindNotepadTabStatePath(string appDataLocalPath)
+        {
+            // 基础路径，其中包含了通配符*以匹配任何可能的包名后缀
+            string searchPattern = @"Packages\Microsoft.WindowsNotepad_*\LocalState\TabState";
+            string basePath = Path.Combine(appDataLocalPath, searchPattern);
+
+            // 使用 DirectoryInfo 和 GetDirectories 来搜索匹配的目录
+            DirectoryInfo di = new DirectoryInfo(appDataLocalPath);
+            if (!di.Exists)
+            {
+                throw new InvalidOperationException("指定的路径不存在");
+            }
+
+            // 查找符合模式的第一个目录
+            DirectoryInfo[] directories = di.GetDirectories("Microsoft.WindowsNotepad_*", SearchOption.AllDirectories);
+            if (directories.Length == 0)
+            {
+                throw new InvalidOperationException("未找到 Microsoft Windows 记事本相关的包目录");
+            }
+
+            // 假设我们只关心找到的第一个匹配项
+            var packageDir = directories.First();
+
+            // 构建最终的 TabState 路径
+            string tabStatePath = Path.Combine(packageDir.FullName, "LocalState", "TabState");
+            return tabStatePath;
+        }
 
         public static void CheckAndKillProcess(string processName)
         {
@@ -40,7 +69,7 @@ namespace NotepadKeeper
             }
             else
             {
-                Console.WriteLine($"Can't find {processName}.");
+                Console.WriteLine($"{processName} is closed. OK.");
             }
         }
 
@@ -278,12 +307,12 @@ namespace NotepadKeeper
                 // 根据第四个字节的值输出结果
                 if (fourthByte == 1)
                 {
-                    Console.WriteLine("----[ SAVED FILE  √]----");
+                    Console.WriteLine("----( SAVED FILE  √)----");
                     savedFile(fileStream);
                 }
                 else
                 {
-                    Console.WriteLine("----[UNSAVED FILE ×]----");
+                    Console.WriteLine("----(UNSAVED FILE ×)----");
                     unsavedFile(fileStream);
                 }
             }
@@ -299,29 +328,54 @@ namespace NotepadKeeper
             string appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
             // 指定要遍历的文件夹路径
-            string directoryPath = $@"{appDataLocalPath}\Packages\Microsoft.WindowsNotepad_8wekyb3d8bbwe\LocalState\TabState";
+            string directoryPath="";
 
-            // 获取目录中所有的.bin文件
-            string[] filePaths = Directory.GetFiles(directoryPath, "*.bin");
-
-            // 定义一个GUID的正则表达式
-            Regex guidRegex = new Regex(@"^[{(]?[0-9A-Fa-f]{8}[-]([0-9A-Fa-f]{4}[-]){3}[0-9A-Fa-f]{12}[)}]?$");
-
-            // 遍历所有文件
-            foreach (string filePath in filePaths)
+            try
             {
-                // 获取文件名（不包括路径）
-                string fileName = Path.GetFileNameWithoutExtension(filePath);
-
-                // 检查文件名是否符合GUID格式
-                if (guidRegex.IsMatch(fileName))
-                {
-                    Console.WriteLine($"================================================");
-                    Console.WriteLine($"Processing file: {filePath}");
-                    dealFileType(filePath);
-                }
+                Console.WriteLine($"\n----[  NOTEPAD  ]----\n");
+                directoryPath = FindNotepadTabStatePath(appDataLocalPath+ @"\Packages");
+                Console.WriteLine("TabState Path：" + directoryPath);
             }
-            Console.WriteLine($"================================================");
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+
+
+            try
+            {
+                // 获取目录中所有的.bin文件
+                string[] filePaths = Directory.GetFiles(directoryPath, "*.bin");
+
+                // 定义一个GUID的正则表达式
+                Regex guidRegex = new Regex(@"^[{(]?[0-9A-Fa-f]{8}[-]([0-9A-Fa-f]{4}[-]){3}[0-9A-Fa-f]{12}[)}]?$");
+
+                // 遍历所有文件
+                foreach (string filePath in filePaths)
+                {
+                    // 获取文件名（不包括路径）
+                    string fileName = Path.GetFileNameWithoutExtension(filePath);
+
+                    // 检查文件名是否符合GUID格式
+                    if (guidRegex.IsMatch(fileName))
+                    {
+                        Console.WriteLine($"--------------------------------");
+                        Console.WriteLine($"Processing file: {filePath}");
+                        dealFileType(filePath);
+                    }
+                }
+                Console.WriteLine($"--------------------------------");
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine("Error: " + ex.Message);
+            }
+
+
+
+           NotepadPP.get();
         }
     }
 }
