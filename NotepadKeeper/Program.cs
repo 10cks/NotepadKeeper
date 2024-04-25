@@ -321,8 +321,9 @@ namespace NotepadKeeper
 
         static void Main(string[] args)
         {
-            // 检查进程是否运行
-            CheckAndKillProcess("notepad");
+
+            // TABLAG
+            Console.WriteLine($"\n----[  NotepadKeeper@10cks  ]----\nProject: https://github.com/10cks/NotepadKeeper\n");
 
             // 获取当前用户的AppData\Local文件夹路径
             string appDataLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -333,6 +334,8 @@ namespace NotepadKeeper
             try
             {
                 Console.WriteLine($"\n----[  NOTEPAD  ]----\n");
+                // 检查进程是否运行
+                CheckAndKillProcess("notepad");
                 directoryPath = FindNotepadTabStatePath(appDataLocalPath+ @"\Packages");
                 Console.WriteLine("TabState Path：" + directoryPath);
             }
