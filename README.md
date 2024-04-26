@@ -1,10 +1,15 @@
+
+OS: Windows 11
+
 Target: notepad/notepad++
 
 Useage:
 
-Run directly in cmd: NotepadKeeper.exe
+- Run directly in cmd: NotepadKeeper.exe
 
-or Redirect output:
+or 
+
+- Redirect output:
 
 ```
 NotepadKeeper.exe > result.txt
