@@ -1,3 +1,4 @@
+[Technical Detail](https://forum.butian.net/share/2947)
 
 OS: Windows 11
 
